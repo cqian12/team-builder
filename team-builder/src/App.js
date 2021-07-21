@@ -1,23 +1,49 @@
-import logo from './logo.svg';
 import './App.css';
+import React, { useState } from 'react';
+import axios from '../node_modules/axios'
+import MyForm from './Form'
+import Member from './Member'
+
+const initialFormVals = {
+  name:'',
+  email:'',
+  role:''
+}
+
 
 function App() {
+  const [members, setMembers] = useState([])
+  const [formVals, setFormVals] = useState(initialFormVals)
+
+  const updateForm = (inputName,inputVal) => {
+    setFormVals({...formVals,[inputName]: inputVal})
+  }
+
+  const submitForm = () => {
+    let newMem = {
+      name:formVals.name.trim(),
+      email:formVals.email.trim(),
+      role:formVals.role
+    }
+
+    if (!newMem.name || !newMem.email || !newMem.role) return
+
+    axios.post('whateversite.com',newMem)
+    .then(res => {
+      setMembers(res.data,...members)
+      setFormVals(initialFormVals)
+    })
+    .catch(err => console.log(err))
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>My Form</h1>
+      <MyForm vals = {formVals} update = {updateForm} submit = {submitForm} />
+
+      {members.map((member, index) => {
+        return (<Member key = {member.id} info = {member} />)
+      })}
     </div>
   );
 }
